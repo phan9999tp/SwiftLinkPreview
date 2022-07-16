@@ -621,22 +621,14 @@ extension SwiftLinkPreview {
             let images = result.images
 
             if images == nil || images?.isEmpty ?? true {
-
-                // Should look for <meta property="og:image" content=""/> first instead of <img/> tag.
-                let values = Regex.pregMatchAll(htmlCode, regex: Regex.secondaryImageTagPattern, index: 2)
-                if !values.isEmpty {
-                    result.images = values
-                    result.image = values.first
-                } else {
-                    // If no OpenGraph image found pick any from <img/> tag to show.
-                    let values = Regex.pregMatchAll(htmlCode, regex: Regex.imageTagPattern, index: 2)
-                    if !values.isEmpty {
-                        let imgs = values.map { self.addImagePrefixIfNeeded($0, result: result) }
-                        result.images = imgs
-                        result.image = imgs.first
-                    }
-                }
-
+                let openGraphValues = Regex.pregMatchAll(htmlCode, regex: Regex.secondaryImageTagPattern, index: 2)
+                let imageTagValues = Regex.pregMatchAll(
+                    htmlCode,
+                    regex: Regex.imageTagPattern,
+                    index: 2
+                ).map { self.addImagePrefixIfNeeded($0, result: result) }
+                result.images = openGraphValues + imageTagValues
+                result.image = openGraphValues.first
             }
         } else {
                 let values = Regex.pregMatchAll(htmlCode, regex: Regex.secondaryImageTagPattern, index: 2)
